@@ -32,7 +32,7 @@ NUM_CATEGORIES = 16
 NUM_PART_CATS = len(all_cats)
 
 MAX_EPOCHS = 50
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 NUM_POINT = 2048
 
 TRAINING_FILE_LIST = os.path.join(hdf5_data_dir, 'train_hdf5_file_list.txt')
