@@ -50,7 +50,7 @@ for epoch in range(MAX_EPOCHS):
             start_idx = batch * BATCH_SIZE
             end_idx = (batch+1) * BATCH_SIZE
             
-            model.to(device)
+            model.cuda()
 
             rotated_data = load_dataset.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
             jittered_data = load_dataset.jitter_point_cloud(rotated_data)
@@ -61,8 +61,8 @@ for epoch in range(MAX_EPOCHS):
             jittered_data = Variable(torch.from_numpy(jittered_data))
             labels = Variable(torch.from_numpy(current_label[start_idx:end_idx]).long())
             
-            jittered_data.to(device)
-            labels.to(device)
+            jittered_data.cuda()
+            labels.cuda()
             optimizer.zero_grad()
 
             out_labels = model(jittered_data)
