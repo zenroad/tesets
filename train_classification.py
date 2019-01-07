@@ -22,8 +22,8 @@ current_data, current_label = load_dataset.loadDataFile(TRAIN_FILES[train_file_i
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-MAX_EPOCHS = 1
-BATCH_SIZE = 2
+MAX_EPOCHS = 5
+BATCH_SIZE = 4
 NUM_POINT = 2048
 
 model = classification_net()
@@ -64,7 +64,6 @@ for epoch in range(MAX_EPOCHS):
             optimizer.zero_grad()
             
             jittered_data = jittered_data.cuda()
-            print(jittered_data.type())
             out_labels = model(jittered_data)
             labels = labels.cuda()
             loss = loss_fn(out_labels, labels)
