@@ -29,7 +29,7 @@ NUM_POINT = 2048
 model = classification_net()
 loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
-model = model.to(device)
+model.to(device)
 
 for epoch in range(MAX_EPOCHS):
 
@@ -63,7 +63,7 @@ for epoch in range(MAX_EPOCHS):
             
             optimizer.zero_grad()
 
-            jittered_data = jittered_data.to(device)
+            jittered_data.to(device)
             print(jittered_data.type())
             out_labels = model(jittered_data)
 
