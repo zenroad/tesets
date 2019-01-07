@@ -40,8 +40,6 @@ for epoch in range(MAX_EPOCHS):
         current_data, current_label, _ = load_dataset.shuffle_data(current_data, np.squeeze(current_label))            
         current_label = np.squeeze(current_label)
         
-        current_data.to(device)
-        current_label.to(device)
 
         file_size = current_data.shape[0]
         num_batches = file_size // BATCH_SIZE
@@ -60,10 +58,12 @@ for epoch in range(MAX_EPOCHS):
             jittered_data = load_dataset.rotate_perturbation_point_cloud(jittered_data)
             jittered_data = load_dataset.shift_point_cloud(jittered_data)
             
-            jittered_data = Variable(torch.from_numpy(jittered_data))
-            labels = Variable(torch.from_numpy(current_label[start_idx:end_idx]).long())
+            jittered_data = torch.from_numpy(jittered_data)
+            labels = torch.from_numpy(current_label[start_idx:end_idx]).long()
             
             optimizer.zero_grad()
+
+            jittered_data.to(device)
 
             out_labels = model(jittered_data)
 
