@@ -64,7 +64,7 @@ for epoch in range(MAX_EPOCHS):
             optimizer.zero_grad()
 
             jittered_data = jittered_data.to(device)
-
+            print(jittered_data.type())
             out_labels = model(jittered_data)
 
             loss = loss_fn(out_labels, labels)
