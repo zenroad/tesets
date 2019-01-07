@@ -29,6 +29,7 @@ NUM_POINT = 2048
 model = classification_net()
 loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
+model.to(device)
 
 for epoch in range(MAX_EPOCHS):
 
@@ -39,6 +40,9 @@ for epoch in range(MAX_EPOCHS):
         current_data, current_label, _ = load_dataset.shuffle_data(current_data, np.squeeze(current_label))            
         current_label = np.squeeze(current_label)
         
+        current_data.to(device)
+        current_label.to(device)
+
         file_size = current_data.shape[0]
         num_batches = file_size // BATCH_SIZE
         
@@ -50,8 +54,6 @@ for epoch in range(MAX_EPOCHS):
             start_idx = batch * BATCH_SIZE
             end_idx = (batch+1) * BATCH_SIZE
             
-            model.cuda()
-
             rotated_data = load_dataset.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
             jittered_data = load_dataset.jitter_point_cloud(rotated_data)
             jittered_data = load_dataset.random_scale_point_cloud(jittered_data)
@@ -61,10 +63,8 @@ for epoch in range(MAX_EPOCHS):
             jittered_data = Variable(torch.from_numpy(jittered_data))
             labels = Variable(torch.from_numpy(current_label[start_idx:end_idx]).long())
             
-            jittered_data.cuda()
-            labels.cuda()
             optimizer.zero_grad()
-            print(jittered_data.type)
+
             out_labels = model(jittered_data)
 
             loss = loss_fn(out_labels, labels)
