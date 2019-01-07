@@ -66,7 +66,7 @@ for epoch in range(MAX_EPOCHS):
             jittered_data = jittered_data.cuda()
             print(jittered_data.type())
             out_labels = model(jittered_data)
-
+            labels = labels.cuda()
             loss = loss_fn(out_labels, labels)
             print(loss)
 
