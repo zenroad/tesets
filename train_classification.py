@@ -20,7 +20,7 @@ current_data, current_label = load_dataset.loadDataFile(TRAIN_FILES[train_file_i
 # print TRAIN_FILES[train_file_idxs[0]]
 # print current_data.shape, np.max(current_label)
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 MAX_EPOCHS = 1
 BATCH_SIZE = 2
