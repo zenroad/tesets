@@ -13,7 +13,7 @@ from part_seg_net import part_seg_net
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-hdf5_data_dir = os.path.join(BASE_DIR, './hdf5_data')
+hdf5_data_dir = os.path.join(BASE_DIR, './data/hdf5_data')
 
 use_cuda = torch.cuda.is_available()
 Float = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor

@@ -16,7 +16,9 @@ TRAIN_FILES = load_dataset.getDataFiles( \
 TEST_FILES = load_dataset.getDataFiles(\
     os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
 train_file_idxs = np.arange(0, len(TRAIN_FILES))
+test_file_idxs = np.arange(0, len(TEST_FILES))
 current_data, current_label = load_dataset.loadDataFile(TRAIN_FILES[train_file_idxs[0]])
+test_current_data, test_current_label = load_dataset.loadDataFile(TRAIN_FILES[test_file_idxs[0]])
 # print TRAIN_FILES[train_file_idxs[0]]
 # print current_data.shape, np.max(current_label)
 
@@ -75,6 +77,8 @@ for epoch in range(MAX_EPOCHS):
 
             print("Done")
 
+    if (epoch%3 == 0):
+        pass
 
 
 
