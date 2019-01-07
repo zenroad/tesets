@@ -30,7 +30,7 @@ model = classification_net()
 loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
-
+model.to(device)
 for epoch in range(MAX_EPOCHS):
 
 
@@ -62,8 +62,8 @@ for epoch in range(MAX_EPOCHS):
             labels = torch.from_numpy(current_label[start_idx:end_idx]).long()
             
             optimizer.zero_grad()
-            model.to(device)
-            jittered_data = jittered_data.long().cuda()
+            
+            jittered_data = jittered_data.cuda()
             print(jittered_data.type())
             out_labels = model(jittered_data)
 
