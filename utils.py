@@ -46,11 +46,11 @@ def get_edge_feature(point_cloud, nn_idx, k=20):
     # print(nn_idx, batch_size, nn_idx+idx_)
 
     point_cloud_flat = point_cloud.contiguous().view(-1, num_dims)
-    print(point_cloud_flat.type())
+    #print(point_cloud_flat.type())
     # point_cloud_nbrs = torch.gather(point_cloud_flat, dim=0, index=nn_idx+idx_)
     idx_ = idx_.cuda()
     indices = (nn_idx+idx_).view(-1, 1).squeeze()
-    print(indices.type())
+    #print(indices.type())
     #point_cloud_nbrs = torch.index_select(point_cloud_flat, dim=0, index=(nn_idx+idx_).view(-1, 1).squeeze())
     point_cloud_nbrs = torch.index_select(point_cloud_flat, dim=0, index=indices)
     point_cloud_nbrs = point_cloud_nbrs.view(batch_size,num_points,k,-1)

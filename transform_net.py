@@ -26,7 +26,7 @@ class input_transform_net(nn.Module):
 		self.bn5 = nn.BatchNorm1d(256)
 
 
-		self.const = Variable(torch.from_numpy(np.eye(K).flatten()).float())
+		self.const = Variable(torch.from_numpy(np.eye(K).flatten()).float()).cuda()
 		self.K = K
 
 
