@@ -29,7 +29,6 @@ NUM_POINT = 2048
 model = classification_net()
 loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
-model.to(device)
 
 for epoch in range(MAX_EPOCHS):
 
@@ -51,6 +50,8 @@ for epoch in range(MAX_EPOCHS):
             start_idx = batch * BATCH_SIZE
             end_idx = (batch+1) * BATCH_SIZE
             
+            model.to(device)
+
             rotated_data = load_dataset.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
             jittered_data = load_dataset.jitter_point_cloud(rotated_data)
             jittered_data = load_dataset.random_scale_point_cloud(jittered_data)
