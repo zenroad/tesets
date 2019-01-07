@@ -29,7 +29,7 @@ NUM_POINT = 2048
 model = classification_net()
 loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
-model.to(device)
+model = model.to(device)
 
 for epoch in range(MAX_EPOCHS):
 
