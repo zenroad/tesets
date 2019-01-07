@@ -106,6 +106,7 @@ class part_seg_net(nn.Module):
         out_max = self.mp1(out8)
 
         one_hot_label_expand = object_label.view(batch_size, self.cat_num, 1, 1)
+        one_hot_label_expand = one_hot_label_expand.float()
         one_hot_label_expand = self.bn9(F.relu(self.conv9(one_hot_label_expand)))
         out_max = torch.cat((out_max, one_hot_label_expand), dim=1)
         out_max = out_max.expand(-1,-1,num_point,-1)
