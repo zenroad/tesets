@@ -63,7 +63,7 @@ for epoch in range(MAX_EPOCHS):
             
             optimizer.zero_grad()
 
-            jittered_data.to(device)
+            jittered_data.cuda()
             print(jittered_data.type())
             out_labels = model(jittered_data)
 
