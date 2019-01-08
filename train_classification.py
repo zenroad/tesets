@@ -113,7 +113,7 @@ for epoch in range(MAX_EPOCHS):
                 loss = loss_fn(out_labels, labels)
                 print(out_labels.size())
                 print(labels.size())
-                acc = torch.sum(out_labels==labels)/float(BATCH_SIZE*NUM_POINT)
+                acc = torch.sum(out_labels.data.max(1)[1]==labels)/float(BATCH_SIZE*NUM_POINT)
                 print("test acc")
                 print(acc)
                 
