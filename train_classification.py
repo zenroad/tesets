@@ -75,7 +75,7 @@ for epoch in range(MAX_EPOCHS):
 
             optimizer.step()
 
-            print(epoch)
+            #print(epoch)
 
     if (epoch%2 == 0):
         for fn in range(len(TEST_FILES)):
@@ -111,8 +111,8 @@ for epoch in range(MAX_EPOCHS):
                 out_labels = model(jittered_data)
                 labels = labels.cuda()
                 loss = loss_fn(out_labels, labels)
-                print(out_labels.size())
-                print(labels.size())
+                #print(out_labels.size())
+                print(labels)
                 acc = torch.sum(out_labels.data.max(1)[1]==labels)/float(BATCH_SIZE*NUM_POINT)
                 print("test acc")
                 print(acc)
