@@ -374,7 +374,6 @@ class classification_net(nn.Module):
  		self.conv3 = nn.Conv2d(128, 64, kernel_size=1)
  		self.conv4 = nn.Conv2d(128, 128, kernel_size=1)
  		self.conv5 = nn.Conv2d(320, 1024, kernel_size=1)
-
  		
  		self.bn1 = nn.BatchNorm2d(64)
  		self.bn2 = nn.BatchNorm2d(64)

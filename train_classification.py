@@ -31,7 +31,7 @@ NUM_POINT = 2048
 
 model = classification_net()
 loss_fn = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=1e-4)
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 model.to(device)
 best_accuracy = 0
@@ -78,9 +78,19 @@ for epoch in range(MAX_EPOCHS):
             train_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
             total_correct += train_accuracy
             #print(epoch)
-            if(batch % 100 ==0):
+            lr_clip = 0.00001
+            for param_group in optimizer.param_groups:
+                old_lr_classifier = param_group['lr']
+            if(batch % 250 ==0):
                 print('train loss: %f' % (loss.float()) )
                 print('train accuracy: %f' % (total_correct/float(batch+1)))
+                lr_classifier = old_lr_classifier * 0.99
+                if lr_classifier < lr_clip:
+                    lr_classifier = lr_clip
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = lr_classifier
+                print('update classifier learning rate: %f -> %f' % (old_lr_classifier, lr_classifier))
+
 
     if (epoch%5 == 0):
         for fn in range(len(TEST_FILES)):
@@ -122,4 +132,6 @@ for epoch in range(MAX_EPOCHS):
                 #acc = torch.sum(correct_mask)/float(BATCH_SIZE)
                 test_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
                 total_correct += test_accuracy
+            print('*********************************')
             print('Tested accuracy: %f' % (total_correct/float(num_batches)))
+
