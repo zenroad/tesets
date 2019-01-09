@@ -69,6 +69,7 @@ for epoch in range(MAX_EPOCHS):
                 out_labels = model(jittered_data)
                 labels = labels.cuda()
                 loss = loss_fn(out_labels, labels)
+                
                 #print(loss)
 
                 loss.backward()
@@ -76,6 +77,8 @@ for epoch in range(MAX_EPOCHS):
                 optimizer.step()
 
                 #print(epoch)
+                if(batch % 100 ==0):
+                    print('train loss: %f' % (loss.float()) )
 
     if (epoch%2 == 0):
         for fn in range(len(TEST_FILES)):
@@ -111,11 +114,11 @@ for epoch in range(MAX_EPOCHS):
                 labels = labels.cuda()
                 #loss = loss_fn(out_labels, labels)
                 #print(out_labels.size())
-                print(labels)
-                print(out_labels.data.max(1)[1])
-                part_acc = torch.eq(labels,out_labels.data.max(1)[1])
-                acc = torch.sum(part_acc)/float(BATCH_SIZE)
-                total_correct = acc + total_correct
-        
-            print('testacc')
-            print(total_correct/float(num_batches))
+                #print(labels)
+                #print(out_labels.data.max(1)[1])
+                correct_mask = torch.eq(labels,out_labels.data.max(1)[1])
+                #acc = torch.sum(correct_mask)/float(BATCH_SIZE)
+                test_accuracy = torch.mean(correct_mask).cpu()
+                total_correct += test_accuracy * labels.size()[0]
+
+            print('Tested accuracy: %f' % (total_correct/float(num_batches)) )
