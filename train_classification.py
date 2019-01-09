@@ -80,7 +80,7 @@ for epoch in range(MAX_EPOCHS):
                 if(batch % 100 ==0):
                     print('train loss: %f' % (loss.float()) )
                     print('Total accuracy: %f' % (total_correct ))
-                    print('train accuracy: %f' % (total_correct/float(batch)))
+                    print('train accuracy: %f' % (total_correct/float(batch+1)))
 
     if (epoch%2 == 0):
         for fn in range(len(TEST_FILES)):
