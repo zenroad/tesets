@@ -84,17 +84,17 @@ for epoch in range(MAX_EPOCHS):
             test_current_data, test_current_label, _ = load_dataset.shuffle_data(test_current_data, np.squeeze(test_current_label))            
             test_current_label = np.squeeze(test_current_label)
             
-            TEST_BATCH_SIZE = 1
+            BATCH_SIZE = 1
             file_size = test_current_data.shape[0]
-            num_batches = file_size // TEST_BATCH_SIZE
+            num_batches = file_size // BATCH_SIZE
             
             total_correct = 0
             total_seen = 0
             test_loss_sum = 0
 
             for batch in range(num_batches):
-                start_idx = batch * TEST_BATCH_SIZE
-                end_idx = (batch+1) * TEST_BATCH_SIZE
+                start_idx = batch * BATCH_SIZE
+                end_idx = (batch+1) * BATCH_SIZE
                 
                 rotated_data = load_dataset.rotate_point_cloud(test_current_data[start_idx:end_idx, :, :])
                 jittered_data = load_dataset.jitter_point_cloud(rotated_data)
@@ -114,7 +114,7 @@ for epoch in range(MAX_EPOCHS):
                 #print(out_labels.size())
                 print(labels)
                 print(out_labels.data.max(1)[1])
-                acc = torch.sum(out_labels.data.max(1)[1]==labels)/float(TEST_BATCH_SIZE*NUM_POINT)
+                acc = torch.sum(out_labels.data.max(1)[1]==labels)/float(BATCH_SIZE*NUM_POINT)
                 print("test acc")
                 print(acc)
                 
