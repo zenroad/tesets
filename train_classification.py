@@ -73,10 +73,14 @@ for epoch in range(MAX_EPOCHS):
                 loss.backward()
 
                 optimizer.step()
-
+                correct_mask = torch.eq(labels,out_labels.data.max(1)[1])
+                train_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
+                total_correct += train_accuracy
                 #print(epoch)
                 if(batch % 100 ==0):
                     print('train loss: %f' % (loss.float()) )
+                    print('Total accuracy: %f' % (total_correct ))
+                    print('train accuracy: %f' % (total_correct/float(batch)))
 
     if (epoch%2 == 0):
         for fn in range(len(TEST_FILES)):
@@ -118,5 +122,5 @@ for epoch in range(MAX_EPOCHS):
                 #acc = torch.sum(correct_mask)/float(BATCH_SIZE)
                 test_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
                 total_correct += test_accuracy
-            print('Total accuracy: %d' % (total_correct ))
-            print('Tested accuracy: %f' % (total_correct/float(num_batches)) )
+            print('Total accuracy: %f' % (total_correct ))
+            print('Tested accuracy: %f' % (total_correct/float(num_batches)))
