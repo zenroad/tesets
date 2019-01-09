@@ -25,7 +25,7 @@ test_current_data, test_current_label = load_dataset.loadDataFile(TRAIN_FILES[te
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-MAX_EPOCHS = 15
+MAX_EPOCHS = 250
 BATCH_SIZE = 4
 NUM_POINT = 2048
 
