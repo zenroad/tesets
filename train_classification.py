@@ -45,7 +45,7 @@ for epoch in range(MAX_EPOCHS):
 
             file_size = current_data.shape[0]
             num_batches = file_size // BATCH_SIZE
-            
+            print('batches length: %d' % num_batches)
             total_correct = 0
             total_seen = 0
             loss_sum = 0
@@ -70,8 +70,6 @@ for epoch in range(MAX_EPOCHS):
                 labels = labels.cuda()
                 loss = loss_fn(out_labels, labels)
                 
-                #print(loss)
-
                 loss.backward()
 
                 optimizer.step()
@@ -89,7 +87,7 @@ for epoch in range(MAX_EPOCHS):
             
             file_size = test_current_data.shape[0]
             num_batches = file_size // BATCH_SIZE
-            
+            print('batches length: %d' % num_batches)
             total_correct = 0
             total_seen = 0
             test_loss_sum = 0
@@ -120,5 +118,5 @@ for epoch in range(MAX_EPOCHS):
                 #acc = torch.sum(correct_mask)/float(BATCH_SIZE)
                 test_accuracy = torch.sum(correct_mask)/float(BATCH_SIZE)
                 total_correct += test_accuracy
-
+            print('Total accuracy: %d' % (total_correct ))
             print('Tested accuracy: %f' % (total_correct/float(num_batches)) )
