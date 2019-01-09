@@ -2,6 +2,7 @@ import load_dataset
 import os
 import numpy as np
 import torch
+import time
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -33,56 +34,55 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
 model.to(device)
+best_accuracy = 0
 for epoch in range(MAX_EPOCHS):
 
-    if (epoch%2 != 0):
-        for fn in range(len(TRAIN_FILES)):
-            current_data, current_label = load_dataset.loadDataFile(TRAIN_FILES[train_file_idxs[fn]])
-            current_data = current_data[:,0:NUM_POINT,:]
-            current_data, current_label, _ = load_dataset.shuffle_data(current_data, np.squeeze(current_label))            
-            current_label = np.squeeze(current_label)
+    for fn in range(len(TRAIN_FILES)):
+        current_data, current_label = load_dataset.loadDataFile(TRAIN_FILES[train_file_idxs[fn]])
+        current_data = current_data[:,0:NUM_POINT,:]
+        current_data, current_label, _ = load_dataset.shuffle_data(current_data, np.squeeze(current_label))            
+        current_label = np.squeeze(current_label)
+        
+
+        file_size = current_data.shape[0]
+        num_batches = file_size // BATCH_SIZE
+        print('train batches length: %d' % num_batches)
+        total_correct = 0
+        total_seen = 0
+        loss_sum = 0
+
+        for batch in range(num_batches):
+            start_idx = batch * BATCH_SIZE
+            end_idx = (batch+1) * BATCH_SIZE
             
+            rotated_data = load_dataset.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
+            jittered_data = load_dataset.jitter_point_cloud(rotated_data)
+            jittered_data = load_dataset.random_scale_point_cloud(jittered_data)
+            jittered_data = load_dataset.rotate_perturbation_point_cloud(jittered_data)
+            jittered_data = load_dataset.shift_point_cloud(jittered_data)
+            
+            jittered_data = torch.from_numpy(jittered_data)
+            labels = torch.from_numpy(current_label[start_idx:end_idx]).long()
+            
+            optimizer.zero_grad()
+            
+            jittered_data = jittered_data.cuda()
+            out_labels = model(jittered_data)
+            labels = labels.cuda()
+            loss = loss_fn(out_labels, labels)
+            
+            loss.backward()
 
-            file_size = current_data.shape[0]
-            num_batches = file_size // BATCH_SIZE
-            print('train batches length: %d' % num_batches)
-            total_correct = 0
-            total_seen = 0
-            loss_sum = 0
+            optimizer.step()
+            correct_mask = torch.eq(labels,out_labels.data.max(1)[1])
+            train_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
+            total_correct += train_accuracy
+            #print(epoch)
+            if(batch % 100 ==0):
+                print('train loss: %f' % (loss.float()) )
+                print('train accuracy: %f' % (total_correct/float(batch+1)))
 
-            for batch in range(num_batches):
-                start_idx = batch * BATCH_SIZE
-                end_idx = (batch+1) * BATCH_SIZE
-                
-                rotated_data = load_dataset.rotate_point_cloud(current_data[start_idx:end_idx, :, :])
-                jittered_data = load_dataset.jitter_point_cloud(rotated_data)
-                jittered_data = load_dataset.random_scale_point_cloud(jittered_data)
-                jittered_data = load_dataset.rotate_perturbation_point_cloud(jittered_data)
-                jittered_data = load_dataset.shift_point_cloud(jittered_data)
-                
-                jittered_data = torch.from_numpy(jittered_data)
-                labels = torch.from_numpy(current_label[start_idx:end_idx]).long()
-                
-                optimizer.zero_grad()
-                
-                jittered_data = jittered_data.cuda()
-                out_labels = model(jittered_data)
-                labels = labels.cuda()
-                loss = loss_fn(out_labels, labels)
-                
-                loss.backward()
-
-                optimizer.step()
-                correct_mask = torch.eq(labels,out_labels.data.max(1)[1])
-                train_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
-                total_correct += train_accuracy
-                #print(epoch)
-                if(batch % 100 ==0):
-                    print('train loss: %f' % (loss.float()) )
-                    print('Total accuracy: %f' % (total_correct ))
-                    print('train accuracy: %f' % (total_correct/float(batch+1)))
-
-    if (epoch%2 == 0):
+    if (epoch%5 == 0):
         for fn in range(len(TEST_FILES)):
             test_current_data, test_current_label = load_dataset.loadDataFile(TEST_FILES[test_file_idxs[fn]])
             test_current_data = test_current_data[:,0:NUM_POINT,:]
@@ -122,5 +122,4 @@ for epoch in range(MAX_EPOCHS):
                 #acc = torch.sum(correct_mask)/float(BATCH_SIZE)
                 test_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
                 total_correct += test_accuracy
-            print('Total accuracy: %f' % (total_correct ))
             print('Tested accuracy: %f' % (total_correct/float(num_batches)))
