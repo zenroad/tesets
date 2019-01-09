@@ -118,7 +118,7 @@ for epoch in range(MAX_EPOCHS):
                 #print(out_labels.data.max(1)[1])
                 correct_mask = torch.eq(labels,out_labels.data.max(1)[1])
                 #acc = torch.sum(correct_mask)/float(BATCH_SIZE)
-                test_accuracy = torch.mean(correct_mask).cpu()
-                total_correct += test_accuracy * labels.size()[0]
+                test_accuracy = torch.sum(correct_mask)/float(BATCH_SIZE)
+                total_correct += test_accuracy
 
             print('Tested accuracy: %f' % (total_correct/float(num_batches)) )
