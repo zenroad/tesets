@@ -84,7 +84,6 @@ for epoch in range(MAX_EPOCHS):
             test_current_data, test_current_label, _ = load_dataset.shuffle_data(test_current_data, np.squeeze(test_current_label))            
             test_current_label = np.squeeze(test_current_label)
             
-            BATCH_SIZE = 1
             file_size = test_current_data.shape[0]
             num_batches = file_size // BATCH_SIZE
             
@@ -110,7 +109,7 @@ for epoch in range(MAX_EPOCHS):
                 jittered_data = jittered_data.cuda()
                 out_labels = model(jittered_data)
                 labels = labels.cuda()
-                loss = loss_fn(out_labels, labels)
+                #loss = loss_fn(out_labels, labels)
                 #print(out_labels.size())
                 print(labels)
                 print(out_labels.data.max(1)[1])
