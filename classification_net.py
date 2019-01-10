@@ -75,7 +75,8 @@ class classification_net(nn.Module):
      def forward(self, point_cloud):
          batch_size, num_point,_ = point_cloud.size()
          pointnetfeat = PointNetfeat(num_points = num_point)
-         point_globle = pointnetfeat(point_cloud)
+         print(point_cloud.size())
+         point_globle = pointnetfeat(point_cloud.permute(0,2,1))
          print(point_globle.size())
          dist_mat = pairwise_distance(point_cloud)
          nn_idx = knn(dist_mat, k=self.k)
