@@ -37,6 +37,8 @@ model.to(device)
 best_accuracy = 0
 for epoch in range(MAX_EPOCHS):
 
+    total_correct = 0
+    total_seen = 0
     for fn in range(len(TRAIN_FILES)):
         current_data, current_label = load_dataset.loadDataFile(TRAIN_FILES[train_file_idxs[fn]])
         current_data = current_data[:,0:NUM_POINT,:]
@@ -47,8 +49,7 @@ for epoch in range(MAX_EPOCHS):
         file_size = current_data.shape[0]
         num_batches = file_size // BATCH_SIZE
         print('train batches length: %d' % num_batches)
-        total_correct = 0
-        total_seen = 0
+        
         loss_sum = 0
 
         for batch in range(num_batches):
@@ -75,15 +76,16 @@ for epoch in range(MAX_EPOCHS):
 
             optimizer.step()
             correct_mask = torch.eq(labels,out_labels.data.max(1)[1])
-            train_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
-            total_correct += train_accuracy
+            #train_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
+
+            total_correct += torch.sum(correct_mask).item()
+            total_seen += out_labels.size()[0]
             #print(epoch)
             lr_clip = 0.00001
             for param_group in optimizer.param_groups:
                 old_lr_classifier = param_group['lr']
-            if(batch % 250 ==0):
+            if(batch % 300 ==0):
                 print('train loss: %f' % (loss.float()) )
-                print('train accuracy: %f' % (total_correct/float(batch+1)))
                 lr_classifier = old_lr_classifier * 0.99
                 if lr_classifier < lr_clip:
                     lr_classifier = lr_clip
@@ -91,8 +93,11 @@ for epoch in range(MAX_EPOCHS):
                     param_group['lr'] = lr_classifier
                 print('update classifier learning rate: %f -> %f' % (old_lr_classifier, lr_classifier))
 
+        print('train accuracy: %f/%d' % (total_correct/float(total_seen),epoch))
 
     if (epoch%5 == 0):
+        total_correct = 0
+        total_seen = 0
         for fn in range(len(TEST_FILES)):
             test_current_data, test_current_label = load_dataset.loadDataFile(TEST_FILES[test_file_idxs[fn]])
             test_current_data = test_current_data[:,0:NUM_POINT,:]
@@ -102,8 +107,7 @@ for epoch in range(MAX_EPOCHS):
             file_size = test_current_data.shape[0]
             num_batches = file_size // BATCH_SIZE
             print('test batches length: %d' % num_batches)
-            total_correct = 0
-            total_seen = 0
+            
             test_loss_sum = 0
 
             for batch in range(num_batches):
@@ -130,8 +134,10 @@ for epoch in range(MAX_EPOCHS):
                 #print(out_labels.data.max(1)[1])
                 correct_mask = torch.eq(labels,out_labels.data.max(1)[1])
                 #acc = torch.sum(correct_mask)/float(BATCH_SIZE)
-                test_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
-                total_correct += test_accuracy
-            print('*********************************')
-            print('Tested accuracy: %f' % (total_correct/float(num_batches)))
+                #test_accuracy = torch.sum(correct_mask).item()/float(BATCH_SIZE)
+                #total_correct += test_accuracy
+                total_correct += torch.sum(correct_mask).item()
+                total_seen += out_labels.size()[0]
+        print('*********************************')
+        print('Tested accuracy: %f/%d' % (total_correct/float(num_batches),epoch))
 

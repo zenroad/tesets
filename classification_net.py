@@ -67,7 +67,7 @@ class classification_net(nn.Module):
          self.fc2 = nn.Linear(512, 256)
          self.fc3 = nn.Linear(256, 40)
 
-         self.dropout = nn.Dropout(p=0.3)
+         self.dropout = nn.Dropout(p=0.2)
 
          self.input_transform = input_transform_net()
          self.k = k
@@ -149,7 +149,7 @@ class classification_net(nn.Module):
          net = self.bn6(F.relu(self.fc1(torch.cat((net,point_globle),1))))
          net = self.dropout(net)
          net = self.bn7(F.relu(self.fc2(net)))
-         net = self.dropout(net)
+         #net = self.dropout(net)
          net = self.fc3(net)
 
          return net
