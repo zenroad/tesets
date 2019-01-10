@@ -76,7 +76,6 @@ class classification_net(nn.Module):
          batch_size, num_point,_ = point_cloud.size()
          pointnetfeat = PointNetfeat(num_points = num_point)
          pointnetfeat.cuda()
-         point_globle = pointnetfeat(point_cloud.permute(0,2,1))
          
          dist_mat = pairwise_distance(point_cloud)
          nn_idx = knn(dist_mat, k=self.k)
@@ -87,15 +86,14 @@ class classification_net(nn.Module):
 
          transform_mat = self.input_transform(edge_feat)
 
-
-
          point_cloud_transformed = torch.bmm(point_cloud, transform_mat)
          dist_mat = pairwise_distance(point_cloud_transformed)
          nn_idx = knn(dist_mat, k=self.k)
          edge_feat = get_edge_feature(point_cloud_transformed, nn_idx=nn_idx, k=self.k)
 
          edge_feat = edge_feat.permute(0,3,1,2)
-
+         
+         point_globle = pointnetfeat(point_cloud_transformed.permute(0,2,1))
 
          net = self.bn1(F.relu(self.conv1(edge_feat)))
          net,_ = torch.max(net, dim=-1, keepdim=True)
