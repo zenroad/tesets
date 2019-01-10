@@ -139,5 +139,5 @@ for epoch in range(MAX_EPOCHS):
                 total_correct += torch.sum(correct_mask).item()
                 total_seen += out_labels.size()[0]
         print('*********************************')
-        print('Tested accuracy: %f/%d' % (total_correct/float(num_batches),epoch))
+        print('Tested accuracy: %f/%d' % (total_correct/float(total_seen),epoch))
 
