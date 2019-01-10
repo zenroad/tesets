@@ -75,6 +75,7 @@ class classification_net(nn.Module):
      def forward(self, point_cloud):
          batch_size, num_point,_ = point_cloud.size()
          pointnetfeat = PointNetfeat(num_points = num_point)
+         pointnetfeat.cuda()
          print(point_cloud.size())
          point_globle = pointnetfeat(point_cloud.permute(0,2,1))
          print(point_globle.size())
