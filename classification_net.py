@@ -214,33 +214,7 @@ class MyConv2d(nn.Module):
         return x
 
 
-class UpConv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=0, output_padding=0, bias=True, activation=None, normalization=None):
-        super(UpConv, self).__init__()
-        self.activation = activation
-        self.normalization = normalization
 
-        self.up_sample = nn.Upsample(scale_factor=2)
-        self.conv = MyConv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True, activation=activation, normalization=normalization)
-
-        self.weight_init()
-
-    def weight_init(self):
-        for m in self.modules():
-            if isinstance(m, nn.ConvTranspose2d) or isinstance(m, nn.Conv2d):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
-                if m.bias is not None:
-                    m.bias.data.fill_(0.001)
-            elif isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.InstanceNorm2d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
-
-    def forward(self, x):
-        x = self.up_sample(x)
-        x = self.conv(x)
-
-        return x
 
 
 class EquivariantLayer(nn.Module):
@@ -365,113 +339,118 @@ class PointResNet(nn.Module):
 
 
 class classification_net(nn.Module):
- 	"""docstring for edge_conv_model"""
- 	def __init__(self, k=20):
- 		super(classification_net, self).__init__()
+     """docstring for edge_conv_model"""
+     def __init__(self, k=20):
+         super(classification_net, self).__init__()
 
- 		self.conv1 = nn.Conv2d(6, 64, kernel_size=1)
- 		self.conv2 = nn.Conv2d(128, 64, kernel_size=1)
- 		self.conv3 = nn.Conv2d(128, 64, kernel_size=1)
- 		self.conv4 = nn.Conv2d(128, 128, kernel_size=1)
- 		self.conv5 = nn.Conv2d(320, 1024, kernel_size=1)
- 		
- 		self.bn1 = nn.BatchNorm2d(64)
- 		self.bn2 = nn.BatchNorm2d(64)
- 		self.bn3 = nn.BatchNorm2d(64)
- 		self.bn4 = nn.BatchNorm2d(128)
- 		self.bn5 = nn.BatchNorm2d(1024)
- 		
- 		self.bn6 = nn.BatchNorm1d(512)
- 		self.bn7 = nn.BatchNorm1d(256)
+         self.conv1 = nn.Conv2d(6, 64, kernel_size=1)
+         self.conv2 = nn.Conv2d(128, 64, kernel_size=1)
+         self.conv3 = nn.Conv2d(128, 64, kernel_size=1)
+         self.conv4 = nn.Conv2d(128, 128, kernel_size=1)
+         self.conv5 = nn.Conv2d(320, 1024, kernel_size=1)
+         
+         self.bn1 = nn.BatchNorm2d(64)
+         self.bn2 = nn.BatchNorm2d(64)
+         self.bn3 = nn.BatchNorm2d(64)
+         self.bn4 = nn.BatchNorm2d(128)
+         self.bn5 = nn.BatchNorm2d(1024)
+         
+         self.bn6 = nn.BatchNorm1d(512)
+         self.bn7 = nn.BatchNorm1d(256)
 
- 		self.fc1 = nn.Linear(1024, 512)
- 		self.fc2 = nn.Linear(512, 256)
- 		self.fc3 = nn.Linear(256, 40)
+         #self.fc1 = nn.Linear(1024, 512)
+         self.fc1 = nn.Linear(1408,512)
+         self.fc2 = nn.Linear(512, 256)
+         self.fc3 = nn.Linear(256, 40)
 
- 		self.dropout = nn.Dropout(p=0.3)
+         self.dropout = nn.Dropout(p=0.3)
 
- 		self.input_transform = input_transform_net()
- 		self.k = k
- 		
- 	
+         self.input_transform = input_transform_net()
+         self.k = k
+         self.first_pointnet = PointResNet(3, [64, 128, 256, 384], activation='relu', normalization='batch',
+                                              momentum=0.1, bn_momentum_decay_step=None, bn_momentum_decay=0.6)
+        
+     
 
- 	def forward(self, point_cloud):
- 		batch_size, num_point,_ = point_cloud.size()
+     def forward(self, point_cloud):
+         point_featrue = self.first_pointnet(point_cloud)
+         batch_size, num_point,_ = point_cloud.size()
+        
+         dist_mat = pairwise_distance(point_cloud)
+         nn_idx = knn(dist_mat, k=self.k)
+         edge_feat = get_edge_feature(point_cloud, nn_idx=nn_idx, k=self.k)
 
- 		dist_mat = pairwise_distance(point_cloud)
- 		nn_idx = knn(dist_mat, k=self.k)
- 		edge_feat = get_edge_feature(point_cloud, nn_idx=nn_idx, k=self.k)
+         edge_feat = edge_feat.permute(0,3,1,2)
+         # point_cloud = point_cloud.permute(0,2,1)
 
- 		edge_feat = edge_feat.permute(0,3,1,2)
- 		# point_cloud = point_cloud.permute(0,2,1)
-
- 		transform_mat = self.input_transform(edge_feat)
-
-
-
- 		point_cloud_transformed = torch.bmm(point_cloud, transform_mat)
- 		dist_mat = pairwise_distance(point_cloud_transformed)
- 		nn_idx = knn(dist_mat, k=self.k)
- 		edge_feat = get_edge_feature(point_cloud_transformed, nn_idx=nn_idx, k=self.k)
-
- 		edge_feat = edge_feat.permute(0,3,1,2)
+         transform_mat = self.input_transform(edge_feat)
 
 
- 		net = self.bn1(F.relu(self.conv1(edge_feat)))
- 		net,_ = torch.max(net, dim=-1, keepdim=True)
- 		net1 = net
+
+         point_cloud_transformed = torch.bmm(point_cloud, transform_mat)
+         dist_mat = pairwise_distance(point_cloud_transformed)
+         nn_idx = knn(dist_mat, k=self.k)
+         edge_feat = get_edge_feature(point_cloud_transformed, nn_idx=nn_idx, k=self.k)
+
+         edge_feat = edge_feat.permute(0,3,1,2)
 
 
- 		net = net.permute(0,2,3,1)
-
- 		dist_mat = pairwise_distance(net)
- 		nn_idx = knn(dist_mat, k=self.k)
- 		edge_feat = get_edge_feature(net, nn_idx=nn_idx, k=self.k)
- 		edge_feat = edge_feat.permute(0,3,1,2)
-
- 		net = self.bn2(F.relu(self.conv2(edge_feat)))
- 		net,_ = torch.max(net, dim=-1, keepdim=True)
- 		net2 = net
-
- 		net = net.permute(0,2,3,1)
-
- 		dist_mat = pairwise_distance(net)
- 		nn_idx = knn(dist_mat, k=self.k)
- 		edge_feat = get_edge_feature(net, nn_idx=nn_idx, k=self.k)
-
- 		edge_feat = edge_feat.permute(0,3,1,2)
+         net = self.bn1(F.relu(self.conv1(edge_feat)))
+         net,_ = torch.max(net, dim=-1, keepdim=True)
+         net1 = net
 
 
- 		net = self.bn3(F.relu(self.conv3(edge_feat)))
- 		net,_ = torch.max(net, dim=-1, keepdim=True)
- 		net3 = net
+         net = net.permute(0,2,3,1)
 
- 		net = net.permute(0,2,3,1)
+         dist_mat = pairwise_distance(net)
+         nn_idx = knn(dist_mat, k=self.k)
+         edge_feat = get_edge_feature(net, nn_idx=nn_idx, k=self.k)
+         edge_feat = edge_feat.permute(0,3,1,2)
 
+         net = self.bn2(F.relu(self.conv2(edge_feat)))
+         net,_ = torch.max(net, dim=-1, keepdim=True)
+         net2 = net
 
- 		dist_mat = pairwise_distance(net)
- 		nn_idx = knn(dist_mat, k=self.k)
- 		edge_feat = get_edge_feature(net, nn_idx=nn_idx, k=self.k)
+         net = net.permute(0,2,3,1)
 
- 		edge_feat = edge_feat.permute(0,3,1,2)
+         dist_mat = pairwise_distance(net)
+         nn_idx = knn(dist_mat, k=self.k)
+         edge_feat = get_edge_feature(net, nn_idx=nn_idx, k=self.k)
 
-
- 		net = self.bn4(F.relu(self.conv4(edge_feat)))
- 		net,_ = torch.max(net, dim=-1, keepdim=True)
- 		net4 = net
- 		# import pdb
- 		# pdb.set_trace()
-
- 		net = self.bn5(F.relu(self.conv5(torch.cat((net1, net2, net3, net4), 1))))
- 		net,_ = torch.max(net, dim=2, keepdim=True)
-
- 		net = net.view(batch_size, -1)
+         edge_feat = edge_feat.permute(0,3,1,2)
 
 
- 		net = self.bn6(F.relu(self.fc1(net)))
- 		net = self.dropout(net)
- 		net = self.bn7(F.relu(self.fc2(net)))
- 		net = self.dropout(net)
- 		net = self.fc3(net)
+         net = self.bn3(F.relu(self.conv3(edge_feat)))
+         net,_ = torch.max(net, dim=-1, keepdim=True)
+         net3 = net
 
- 		return net
+         net = net.permute(0,2,3,1)
+
+
+         dist_mat = pairwise_distance(net)
+         nn_idx = knn(dist_mat, k=self.k)
+         edge_feat = get_edge_feature(net, nn_idx=nn_idx, k=self.k)
+
+         edge_feat = edge_feat.permute(0,3,1,2)
+
+
+         net = self.bn4(F.relu(self.conv4(edge_feat)))
+         net,_ = torch.max(net, dim=-1, keepdim=True)
+         net4 = net
+         # import pdb
+         # pdb.set_trace()
+
+         net = self.bn5(F.relu(self.conv5(torch.cat((net1, net2, net3, net4), 1))))
+         net,_ = torch.max(net, dim=2, keepdim=True)
+
+         net = net.view(batch_size, -1)
+
+         net = torch.cat(net,point_featrue)
+
+         net = self.bn6(F.relu(self.fc1(net)))
+         net = self.dropout(net)
+         net = self.bn7(F.relu(self.fc2(net)))
+         net = self.dropout(net)
+         net = self.fc3(net)
+
+         return net
