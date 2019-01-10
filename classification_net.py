@@ -373,6 +373,7 @@ class classification_net(nn.Module):
      
 
      def forward(self, point_cloud):
+         print(point_cloud.size())
          point_featrue = self.first_pointnet(point_cloud)
          batch_size, num_point,_ = point_cloud.size()
         
