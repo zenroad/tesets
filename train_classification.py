@@ -26,7 +26,7 @@ test_current_data, test_current_label = load_dataset.loadDataFile(TRAIN_FILES[te
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 MAX_EPOCHS = 250
-BATCH_SIZE = 4
+BATCH_SIZE = 6
 NUM_POINT = 2048
 
 model = classification_net()
@@ -91,7 +91,7 @@ for epoch in range(MAX_EPOCHS):
                     lr_classifier = lr_clip
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = lr_classifier
-                print('update classifier learning rate: %f -> %f' % (old_lr_classifier, lr_classifier))
+                #print('update classifier learning rate: %f -> %f' % (old_lr_classifier, lr_classifier))
 
         print('train accuracy: %f/%d' % (total_correct/float(total_seen),epoch))
 

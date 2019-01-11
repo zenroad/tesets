@@ -44,7 +44,7 @@ class PointNetfeat(nn.Module):
 
 class classification_net(nn.Module):
      """docstring for edge_conv_model"""
-     def __init__(self, k=20):
+     def __init__(self, k=30):
          super(classification_net, self).__init__()
 
          self.conv1 = nn.Conv2d(6, 64, kernel_size=1)
@@ -67,7 +67,7 @@ class classification_net(nn.Module):
          self.fc2 = nn.Linear(512, 256)
          self.fc3 = nn.Linear(256, 40)
 
-         self.dropout = nn.Dropout(p=0.2)
+         self.dropout = nn.Dropout(p=0.1)
 
          self.input_transform = input_transform_net()
          self.k = k
