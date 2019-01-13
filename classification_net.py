@@ -137,7 +137,7 @@ class classification_net(nn.Module):
 
          self.dropout = nn.Dropout(p=0.1)
 
-         self.input_transform = input_transform_net()
+         self.input_transform = input_transform_net(K=k)
          self.k = k
 
      def forward(self, point_cloud):
