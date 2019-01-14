@@ -135,9 +135,9 @@ class classification_net(nn.Module):
          self.fc2 = nn.Linear(512, 256)
          self.fc3 = nn.Linear(256, 40)
 
-         self.dropout = nn.Dropout(p=0.1)
+         self.dropout = nn.Dropout(p=0.2)
 
-         self.input_transform = input_transform_net(K=k)
+         self.input_transform = input_transform_net()
          self.k = k
 
      def forward(self, point_cloud):
