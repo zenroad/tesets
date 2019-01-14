@@ -84,9 +84,9 @@ for epoch in range(MAX_EPOCHS):
             lr_clip = 0.00001
             for param_group in optimizer.param_groups:
                 old_lr_classifier = param_group['lr']
-            if(batch % 150 ==0):
+            if(epoch % 20 ==0 and epoch != 0):
                 print('train loss: %f' % (loss.float()) )
-                lr_classifier = old_lr_classifier * 0.99
+                lr_classifier = old_lr_classifier * 0.5
                 if lr_classifier < lr_clip:
                     lr_classifier = lr_clip
                 for param_group in optimizer.param_groups:
