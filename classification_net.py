@@ -130,8 +130,8 @@ class classification_net(nn.Module):
          self.bn6 = nn.BatchNorm1d(512)
          self.bn7 = nn.BatchNorm1d(256)
 
-         #self.fc1 = nn.Linear(1024, 512)
-         self.fc1 = nn.Linear(2048,512)
+         self.fc1 = nn.Linear(1024, 512)
+         #self.fc1 = nn.Linear(2048,512)
          self.fc2 = nn.Linear(512, 256)
          self.fc3 = nn.Linear(256, 40)
 
@@ -142,7 +142,7 @@ class classification_net(nn.Module):
 
      def forward(self, point_cloud):
          batch_size, num_point,_ = point_cloud.size()
-         pointnetfeat = PointNetfeat(num_points = num_point)
+         #pointnetfeat = PointNetfeat(num_points = num_point)
          pointnetfeat.cuda()
          
          dist_mat = pairwise_distance(point_cloud)
@@ -161,7 +161,7 @@ class classification_net(nn.Module):
 
          edge_feat = edge_feat.permute(0,3,1,2)
          
-         point_globle = pointnetfeat(point_cloud_transformed.permute(0,2,1))
+         #point_globle = pointnetfeat(point_cloud_transformed.permute(0,2,1))
 
          net = self.bn1(F.relu(self.conv1(edge_feat)))
          net,_ = torch.max(net, dim=-1, keepdim=True)
@@ -213,8 +213,8 @@ class classification_net(nn.Module):
 
          net = net.view(batch_size, -1)
 
-
-         net = self.bn6(F.relu(self.fc1(torch.cat((net,point_globle),1))))
+         net = self.bn6(F.relu(self.fc1(net,)))
+         #net = self.bn6(F.relu(self.fc1(torch.cat((net,point_globle),1))))
          net = self.dropout(net)
          net = self.bn7(F.relu(self.fc2(net)))
          #net = self.dropout(net)
